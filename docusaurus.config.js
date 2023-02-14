@@ -67,14 +67,14 @@ const config = {
             type: 'doc',
             docId: 'why-grpc',
             position: 'left',
-            label: 'Why gRPC',
+            label: 'Why Use gRPC',
           },
-          {
-            type: 'doc',
-            docId: 'why-grpc',
-            position: 'left',
-            label: 'gRPC Tutorials',
-          },
+          // {
+          //   type: 'doc',
+          //   docId: 'why-grpc',
+          //   position: 'left',
+          //   label: 'gRPC Tutorials',
+          // },
           { to: '/blog', label: 'Blog', position: 'left', },
           {
             href: 'https://github.com/facebook/docusaurus',
