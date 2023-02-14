@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package african_hospitals;
+
+message Hospital {
+  string id = 1;
+  string name = 2;
+  string type = 3;
+  string ownership = 4;
+  Location location = 5;
+}
+
+message Location {
+  float latitude = 1;
+  float longitude = 2;
+}
+
+service HospitalService {
+    rpc ListHospitals (ListHospitalsRequest) returns (ListHospitalsResponse);
+    rpc GetHospital (GetHospitalRequest) returns (Hospital);
+}
+
+message ListHospitalsRequest {
+
+}
+
+message ListHospitalsResponse {
+  repeated Hospital hospitals = 1;
+}
+
+message GetHospitalRequest {
+  string id = 1;
+}

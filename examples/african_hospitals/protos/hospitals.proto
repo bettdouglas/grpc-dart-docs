@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package african_hospitals;
+
+service HospitalService {
+  // Lists all hospitals
+  rpc ListHospitals (ListHospitalsRequest) returns (ListHospitalsResponse);
+  // Gets a single hospital by id
+  rpc GetHospital (GetHospitalRequest) returns (Hospital);
+  // Filter hospitals by country or name
+  rpc SearchHospitals (SearchHospitalsRequest) returns (SearchHospitalsResponse);
+}
+
+message ListHospitalsRequest {}
+
+message ListHospitalsResponse {
+  repeated Hospital hospitals = 1;
+}
+
+message GetHospitalRequest {
+  string id = 1;
+}
+
+message SearchHospitalsRequest {
+  string country = 1;
+  string name = 2;
+}
+
+message SearchHospitalsResponse {
+  repeated Hospital hospitals = 1;
+}
+
+message Hospital {
+  string id = 1;
+  string name = 2;
+  string type = 3;
+  string ownership = 4;
+  LatLng latLng = 5;
+  string country = 6;
+}
+
+message LatLng {
+  float latitude = 1;
+  float longitude = 2;
+}
