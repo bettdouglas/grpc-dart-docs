@@ -8,7 +8,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Fullstack Dart with gRPC',
   tagline: 'One Language for your server-side and client-side logic.',
-  url: 'https://your-docusaurus-test-site.com',
+  url: 'https://grpc-dart-docs.pages.dev/',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -121,12 +121,12 @@ const config = {
               },
               {
                 label: 'GitHub',
-                href: 'https://github.com/facebook/docusaurus',
+                href: 'https://github.com/bettdouglas/grpc-dart-docs',
               },
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} My First OpenSource Project, Inc. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} gRPC Dart Community, Inc. Built with Docusaurus.`,
       },
       prism: {
         theme: lightCodeTheme,

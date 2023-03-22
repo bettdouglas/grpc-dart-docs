@@ -4,32 +4,32 @@ import styles from './styles.module.css';
 
 const FeatureList = [
   {
-    title: 'Easy to Use',
+    title: 'Speed up your applications 🔥',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        gRPC is roughly 7 times faster than REST when receiving data & roughly 10 times faster than REST when sending data
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Use Protocol Buffers',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
-      <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
-      </>
+       <ol>
+       Built on top of protobuf which offers 
+        <li> Compact data storage meaning smaller network latency</li>
+        <li>Fast parsing and availability in many languages. </li>
+        <li>Optimized functionality through automatically-generated classes.</li>
+       </ol>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Use the full power of Dart',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        You've seen how powerful the dart lanugage is on Flutter. Bring the same power to your backends. 
       </>
     ),
   },
