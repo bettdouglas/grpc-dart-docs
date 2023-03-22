@@ -1,0 +1,1 @@
+In this guide, we'll use freezed, riverpod and flutter to build this app. 

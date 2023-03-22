@@ -1,0 +1,17 @@
+name: african_hospitals_client
+description: A Very Good Project created by Very Good CLI.
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ">=2.19.0 <3.0.0"
+
+dependencies:
+  build_grpc_channel: ^0.5.0
+  grpc: ^3.1.0
+  protobuf: ^2.1.0
+
+dev_dependencies:
+  mocktail: ^0.3.0
+  test: ^1.19.2
+  very_good_analysis: ^4.0.0
