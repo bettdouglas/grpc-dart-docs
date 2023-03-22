@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:firebase_auth_admin_verify/firebase_auth_admin_verify.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:grpc/grpc.dart';
 import 'package:hospitals/src/config.dart';
 
@@ -11,6 +10,7 @@ FutureOr<GrpcError?> logMetadataInterceptor(
 ) {
   print(method.name);
   print(call.clientMetadata);
+  return null;
 }
 
 Future<GrpcError?> authInterceptor(
@@ -39,4 +39,5 @@ Future<GrpcError?> authInterceptor(
   } on FirebaseVerifyException catch (e) {
     return GrpcError.unauthenticated(e.message);
   }
+  return null;
 }

@@ -6,7 +6,7 @@ import 'package:fast_csv/fast_csv.dart' as fast_csv;
 import 'package:hospitals/src/generated/index.dart';
 
 Future<List<Hospital>> readHospitalsFromCsv() async {
-  final hospitalsPath = 'data/hospitals.csv';
+  final hospitalsPath = 'app/data/hospitals.csv';
   final fileContents = await File(hospitalsPath).readAsString();
   return fast_csv
       .parse(fileContents)

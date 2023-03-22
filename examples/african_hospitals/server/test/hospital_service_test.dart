@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:grpc/grpc.dart';
@@ -6,35 +5,35 @@ import 'package:hospitals/src/generated/index.dart';
 import 'package:test/test.dart';
 
 void main() {
-  final port = '8081';
+  final port = '443';
   late Process p;
   late HospitalServiceClient hospitalServiceClient;
 
   setUpAll(() async {
-    p = await Process.start(
-      'dart',
-      ['run', 'bin/hospitals_server.dart'],
-      environment: {'PORT': port},
-    );
+    // p = await Process.start(
+    //   'dart',
+    //   ['run', 'bin/hospitals_server.dart'],
+    //   environment: {'PORT': port},
+    // );
 
     // Wait for server to start and print to stdout.
 
-    final stdOut = p.stdout.asBroadcastStream();
-    stdOut.transform(utf8.decoder).forEach(print);
+    // final stdOut = p.stdout.asBroadcastStream();
+    // stdOut.transform(utf8.decoder).forEach(print);
 
-    await stdOut.first;
+    // await stdOut.first;
     final channel = ClientChannel(
-      InternetAddress.anyIPv4,
+      'hospitals-grpc-server-of5ogbihaa-oa.a.run.app',
       port: int.parse(port),
       options: ChannelOptions(
-        credentials: ChannelCredentials.insecure(),
+        credentials: ChannelCredentials.secure(),
       ),
     );
 
     hospitalServiceClient = HospitalServiceClient(channel);
   });
 
-  tearDownAll(() => p.kill());
+  // tearDownAll(() => p.kill());
   final existingId = '58281511-980f-40f3-a391-f55fa3c685c8';
 
   group('GetHospital', () {
