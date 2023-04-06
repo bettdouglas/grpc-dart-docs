@@ -58,6 +58,8 @@ class LoggingInterceptor implements ClientInterceptor {
 To know the method call, the `ClientMethod` class contains a parameter called path which represents the name of the method to be invoked on the server. We'll just print the method name here and call the method to proceed with its functionality.
 
 ```dart
+// Picked from StackOverflow
+// https://stackoverflow.com/questions/72949714/how-to-intercept-grpc-response/72949742#72949742
   @override
   ResponseFuture<R> interceptUnary<Q, R>(
     ClientMethod<Q, R> method,
@@ -65,9 +67,28 @@ To know the method call, the `ClientMethod` class contains a parameter called pa
     CallOptions options,
     ClientUnaryInvoker<Q, R> invoker,
   ) {
-    logger.info(method.path);
-    logger.info(options.metadata);
-    return super.interceptUnary(method, request, options, invoker);
+    // Log the request
+    log(
+      'Grpc request. '
+      'method: ${method.path}, '
+      'request: $request',
+    );
+    final response = super.interceptUnary(
+      method,
+      request,
+      options,
+      invoker,
+    );
+    // Registers callback to be called when the future completes
+    response.then((r) {
+      log(
+        'Grpc response. '
+        'method: ${method.path}, '
+        'response: $r',
+      );
+    });
+
+    return response;
   }
 ```
 
@@ -95,6 +116,9 @@ final clientStub = HospitalServerClient(
 ```
 
 ## Metadata Modifying Interceptor
+
+When sending requests to the client, we have to find a way to identify ourselves to the server. This is Authentication. We also need Authorization. These type of information is normally put in headers of a request. The header information is sent together with the request.
+
 Let's say you use Firebase Authentication and you want to send the firebase idToken to the backend server since the backend can validate Firebase Claims and know who's the user sending this request. 
 We can either have all calls to gRPC call the getIDToken method and manually inject the idToken into the call options then make the call. Or we can create a single interceptor that does that on all calls either Streaming/Unary calls. 
 
@@ -191,6 +215,12 @@ Once we've defined the metadata modifying function, we create a copy of the outg
     return super.interceptUnary(method, request, modifiedOptions, invoker);
   }
 ```
-I hope that makes us understand how to handle inject metadata that come from asynchronous source.
+I hope that makes us understand how to handle inject metadata that come from asynchronous source e.g if you store a token in secured storage.
+
+## Logging Interceptor
+In this example, let's say we want to create an interceptor to be used to log requests and responses. 
+This interceptor will print the contents of our sent message and the response sent back to us. 
+
 
 To look into the server-side interceptors, the guide will be in the README contained in the `server/` folder
+
