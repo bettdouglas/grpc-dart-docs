@@ -9,7 +9,9 @@ void main(List<String> arguments) async {
   final hospitals = await readHospitalsFromCsv();
 
   // Create instance of the repository
-  final hospitalRepository = HospitalRepository(hospitals: hospitals);
+  final hospitalRepository = HospitalRepository(
+    hospitals: hospitals.take(200).toList(),
+  );
 
   // Create an instance of HospitalService
   final hospitalService = HospitalService(

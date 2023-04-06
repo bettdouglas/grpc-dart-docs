@@ -41,3 +41,16 @@ Future<GrpcError?> authInterceptor(
   }
   return null;
 }
+
+Future<GrpcError?> accessTokenInterceptor(
+  ServiceCall call,
+  ServiceMethod method,
+) async {
+  final metadata = call.clientMetadata ?? {};
+  final token = metadata['token'];
+  if (token == 'letmein') {
+    return null;
+  } else {
+    return GrpcError.unauthenticated('Token is not valid');
+  }
+}
