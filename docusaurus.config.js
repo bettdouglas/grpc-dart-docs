@@ -7,7 +7,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Fullstack Dart with gRPC',
-  tagline: 'One Language for your server-side and client-side logic.',
+  tagline: 'One Language for your serverside and clientside needs.',
   url: 'https://grpc-dart-docs.pages.dev/',
   baseUrl: '/',
   onBrokenLinks: 'throw',
@@ -57,17 +57,17 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'gRPC with Dart',
+        title: 'gRPC Dart',
         logo: {
-          alt: 'gRPC with Dart Logo',
-          src: 'img/logo.svg',
+          alt: 'gRPC Dart Logo',
+          src: 'img/flutter-grpc-dart-removebg-preview.png',
         },
         items: [
           {
             type: 'doc',
             docId: 'why-grpc',
             position: 'left',
-            label: 'Why Use gRPC',
+            label: 'Explore Docs',
           },
           // {
           //   type: 'doc',
@@ -77,7 +77,7 @@ const config = {
           // },
           { to: '/blog', label: 'Blog', position: 'left', },
           {
-            href: 'https://github.com/facebook/docusaurus',
+            href: 'https://github.com/bettdouglas/grpc-dart-docs',
             label: 'GitHub',
             position: 'right',
           },
@@ -100,16 +100,16 @@ const config = {
             items: [
               {
                 label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+                href: 'https://stackoverflow.com/questions/tagged/grpc+dart',
               },
-              {
-                label: 'Discord',
-                href: 'https://discordapp.com/invite/docusaurus',
-              },
-              {
-                label: 'Twitter',
-                href: 'https://twitter.com/docusaurus',
-              },
+              // {
+              //   label: 'Discord',
+              //   href: 'https://discordapp.com/invite/docusaurus',
+              // },
+              // {
+              //   label: 'Twitter',
+              //   href: 'https://twitter.com/docusaurus',
+              // },
             ],
           },
           {

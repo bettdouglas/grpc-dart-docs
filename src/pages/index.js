@@ -18,7 +18,7 @@ function HomepageHeader() {
           <Link
             className="button button--secondary button--lg"
             to="/docs/why-grpc">
-            Become Fullstack with gRPC & Dart ⏱️
+            Get Started 
           </Link>
         </div>
         <br></br>
