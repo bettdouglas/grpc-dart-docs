@@ -1,0 +1,36 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "african_hospitals_client",
+            "cwd": "examples/african_hospitals/african_hospitals_client",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "AfricanHospitals server",
+            "cwd": "examples/african_hospitals/server",
+            "request": "launch",
+            "type": "dart",
+            "program": "bin/hospitals_server.dart",
+            "env" : {
+                "PORT": 9980
+            }
+        },
+        {
+            "name": "african_hospitals_bloc_client",
+            "cwd": "examples/african_hospitals/apps/african_hospitals_bloc_client",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "african_hospitals_riverpod_client",
+            "cwd": "examples/african_hospitals/apps/african_hospitals_riverpod_client",
+            "request": "launch",
+            "type": "dart"
+        },
+    ]
+}

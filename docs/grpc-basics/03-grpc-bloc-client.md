@@ -157,7 +157,7 @@ dev_dependencies:
   freezed: 
 ```
 
-After running ```flutter pub get```, let's start build_runner since freezed makes our lives easier through code generation. And it has many more useful utilities that make lives easier. Check it out on [pub.dev](pub.dev/packages/freezed). Especially union types, these make pattern matching really easy. 
+After running ```flutter pub get```, let's start build_runner since freezed makes our lives easier through code generation. And it has many more useful utilities that make lives easier. Check it out on [pub.dev](https://pub.dev/packages/freezed). Especially union types, these make pattern matching really easy. 
 
 After importing the `african_hospitals_client`, we'll use `RepositoryProvider` to inject the `HospitalServiceClient` into our app so that we access it when implementing the various blocs. 
 
