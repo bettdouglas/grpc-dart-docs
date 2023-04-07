@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:firebase_auth_admin_verify/firebase_auth_admin_verify.dart';
-import 'package:firebase_dart/implementation/testing.dart';
 import 'package:grpc/grpc.dart';
 import 'package:hospitals/src/config.dart';
 import 'package:hospitals/src/generated/index.dart';
@@ -13,8 +11,13 @@ void main() {
   final port = '8081';
   late Process p;
   late HospitalServiceClient hospitalServiceClient;
+  late String token;
 
   setUpAll(() async {
+    FirebaseDart.setup(storagePath: 'test');
+    final user = await _getTestToken();
+    addTearDown(() async => await user.delete());
+    token = await user.getIdToken();
     p = await Process.start(
       'dart',
       ['run', 'bin/hospitals_server.dart'],
@@ -40,10 +43,15 @@ void main() {
 
   tearDownAll(() => p.kill());
 
-  test('returns GrpcError.unathenticated if token is not supplied', () {});
-  test('returns GrpcError.unathenticated if token is not supplied', () {});
+  test('returns GrpcError.unathenticated if token is not supplied', () async {
+    expect(
+      () async => await hospitalServiceClient.listHospitals(
+        ListHospitalsRequest(),
+      ),
+      throwsA(isA<GrpcError>()),
+    );
+  });
   test('returns List of hospitals if supplied token is valid', () async {
-    final token = await _getTestToken();
     await expectLater(
       hospitalServiceClient.listHospitals(
         ListHospitalsRequest(),
@@ -54,9 +62,7 @@ void main() {
   });
 }
 
-Future<String> _getTestToken() async {
-  await FirebaseTesting.setup();
-
+Future<User> _getTestToken() async {
   final app = await Firebase.initializeApp(
     options: FirebaseOptions(
       apiKey: dotEnv.getOrElse(
@@ -81,24 +87,15 @@ Future<String> _getTestToken() async {
       ),
     ),
   );
-  var backend = FirebaseTesting.getBackend(app.options);
 
-  final email = 'intergration_test_email@gmail.com';
+  final email = 'intergration_test_email1@gmail.com';
   final password = 'password';
 
-  final user = await backend.authBackend.createUser(
-    email: email,
-    password: password,
-  );
-
-  // final token = await backend.authBackend.generateIdToken(uid: uid, providerId: providerId)
   var auth = FirebaseAuth.instanceFor(app: app);
-  final cred = await auth.signInWithEmailAndPassword(
+  final userCredential = await auth.createUserWithEmailAndPassword(
     email: email,
     password: password,
   );
-  return await backend.authBackend.generateIdToken(
-    uid: cred.user!.uid,
-    providerId: cred.additionalUserInfo!.providerId!,
-  );
+  final user = userCredential.user!;
+  return user;
 }
