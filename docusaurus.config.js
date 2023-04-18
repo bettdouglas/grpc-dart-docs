@@ -13,6 +13,10 @@ const config = {
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/flutter-grpc-dart-removebg-preview.png',
+  customFields: {
+    description: "Your go-to site when building gRPC servers in Dart",
+  },
+
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
