@@ -21,19 +21,19 @@ Kreya stores your project configuration in a folder on your machine. Click on `S
 
 Give it a project name and click `Create`. 
 
-![Kreya Create Project Page](img/kreya-welcome-screen.png)
+![Kreya Create Project Page](img/create-project.png)
 
 In the initial project setup popup, when asked what types of APIs, choose gRPC or REST if you plan to include REST apis here as well then click Next. 
 
 Next, we'll need to tell Kreya where to find our gRPC services. 
 It supports 
-1. `Server reflection`
+1. Server reflection
 2. Choose your proto directory or proto definition file. 
 3. Proto file descriptor set
 
 ![Kreya Create Project Page](img/proto-definitions-page.png)
 
-Choose one option and click next. 
+Choose one option and click `Next`. 
 
 # Server details
 On the next page, choose where your server is running on, and whether it's using TLS/SSL. Here you'll also choose the mode under which you want the traffic transmitted as. You can use plain gRPC,gRPC web and gRPC Web(Text). 
