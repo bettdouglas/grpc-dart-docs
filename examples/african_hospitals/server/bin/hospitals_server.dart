@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:grpc/grpc.dart';
 import 'package:hospitals/src/hospital_repository.dart';
 import 'package:hospitals/src/hospital_service_impl.dart';
-import 'package:hospitals/src/interceptors.dart';
 
 void main(List<String> arguments) async {
   // we read the list of hospitals from csv
@@ -21,7 +20,7 @@ void main(List<String> arguments) async {
 
   final services = [hospitalService];
   final interceptors = <Interceptor>[
-    authInterceptor,
+    // authInterceptor,
   ];
 
   // Add the service to the server

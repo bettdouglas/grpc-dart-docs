@@ -1,5 +1,6 @@
+import 'package:african_hospitals_riverpod_client/get_hospital/provider/get_hospital_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:african_hospitals_riverpod_client/get_hospital/provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// {@template get_hospital_body}
 /// Body of the GetHospitalPage.

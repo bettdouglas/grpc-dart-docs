@@ -1,0 +1,3 @@
+[submodule "examples/be-real-clone"]
+	path = examples/be-real-clone
+	url = https://github.com/bettdouglas/be-real-clone.git
