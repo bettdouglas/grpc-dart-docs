@@ -1000,6 +1000,8 @@ git checkout 9be73f8
 ```
 :::
 
+Make sure that you also run the migrations as specified at [Migrations Section](#migrations)
+
 With the new database changes to use views, there will be changes on the `UserRepository` as the queries will be updated to match the new views. The changes are quite explanatory since without the views, we queried the `UserView`, but with views, we have queries that query `CompleteUserView` ,`FullUserView` and `BaseUserView`
 
 :::tip
@@ -1213,4 +1215,38 @@ If you want to test the service, use [kreya](https://kreya.app) for this.
 ## Likes Service
 To handle the likes, we'll need a service that will `Create`, `Delete` and `List` likes. Unliking a photo will be handled by `DeleteLike` method. Liking a photo will be handled by `CreateLike` photo. Listing a photo's likes will be handled by `ListLikes` method. 
 
+### Proto Service Definition
+```protobuf
+syntax = "proto3";
 
+package bereal;
+
+import "models.proto";
+import "google/protobuf/empty.proto";
+
+service LikeService {
+    rpc CreateLike (CreateLikeRequest) returns (CreateLikeResponse);
+    rpc DeleteLike (DeleteLikeRequest) returns (google.protobuf.Empty);
+    rpc ListLikes (ListLikesRequest) returns (ListLikesResponse);
+}   
+
+message CreateLikeRequest {
+    string photo_id = 1;
+}
+
+message CreateLikeResponse {
+    Like like = 2;
+}
+
+message DeleteLikeRequest {
+    string id = 1;
+}
+
+message ListLikesRequest {
+    string photo_id = 1;
+}
+
+message ListLikesResponse {
+    repeated Like likes = 2;
+}
+```
