@@ -29,6 +29,17 @@ dart pub add build_runner --dev
 Let's say we want to model a User in the database. The user will have a unique id, a username, a phone which may be present or not and the creation date. We'll need to create an abstract class with the defined properties. 
 We'll also hash the user's password with a secret key so that during login, we can check the password and return a JWT we can use to authenticate requests. 
 
+
+:::tip
+
+You can follow along yourself by cloning the repo at this [be-real-clone](https://github.com/bettdouglas/be-real-clone.git).
+```bash
+git clone https://github.com/bettdouglas/be-real-clone.git
+cd be-real-clone
+git checkout 7876f99
+```
+:::
+
 ```dart title=lib/database/models.dart
 import 'package:stormberry/stormberry.dart';
 
@@ -188,6 +199,16 @@ final updatedUser = await database.users.queryUser('id');
 await database.users.deleteOne('id');
 ```
 You can see how easy stormberry makes life for us. We'd be busy writing SQL queries but now we're focused on implementing the business logic. It also uses views which is a really nice thing. 
+
+:::tip
+
+You can follow along yourself by cloning the repo at this [be-real-clone](https://github.com/bettdouglas/be-real-clone.git).
+```bash
+git clone https://github.com/bettdouglas/be-real-clone.git
+cd be-real-clone
+git checkout e7103c8
+```
+:::
 
 
 ## gRPC User Service
@@ -685,6 +706,17 @@ Future<grpc.User> updateUser(
 ```
 We'll use the `UserUpdateRequest` from stormberry passing the fields which need to be updated as nullables. If null, stormberry will not update the specified field. We'll then check the `UpdateMask` paths to see which fields does the client want to update. 
 
+:::tip
+
+You can test the server at this point by cloning the repo and connect to it using [kreya](https://kreya.app) desktop client.
+```bash
+git clone https://github.com/bettdouglas/be-real-clone.git
+cd be-real-clone
+git checkout c4cca3b
+dart run bin/server.dart
+```
+:::
+
 ### Authentication
 Right now, this server can be queried by anyone. The only methods that need to be open to the public are the `Login` and `CreateUser` method. All other methods should require proper authorization through the use of a token. 
 When someone logs in successfully, the server returns a jwt as part of the `LoginResponse` object. 
@@ -751,3 +783,14 @@ void main() {
 ```
 
 With this, we can now validate that only logged in users have access to the database. 
+
+:::tip
+
+You can follow along yourself by cloning the repo at this [be-real-clone](https://github.com/bettdouglas/be-real-clone.git).
+```bash
+git clone https://github.com/bettdouglas/be-real-clone.git
+cd be-real-clone
+git checkout e335467
+dart run bin/server.dart
+```
+:::
