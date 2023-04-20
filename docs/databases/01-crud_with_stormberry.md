@@ -794,3 +794,423 @@ git checkout e335467
 dart run bin/server.dart
 ```
 :::
+
+## Photos gRPC Service
+
+In our bereal clone, we want to users to share photos to their profiles. So we'll need to create a service that enables users to upload photos, view photos, favorite photos and more. 
+
+We'll of course start with our proto service definition of what a Photo will have
+
+```protobuf title="protos/models.proto"
+message Photo {
+    string id = 1;
+    string url = 2;
+    string description = 3;
+    google.protobuf.Timestamp created_at = 4;
+    User creator = 5;
+    /// we'll send the list of users who've liked the photos
+    repeated User likers = 6;
+}
+```
+
+We'll then create a CRUD service for Photos. 
+
+```protobuf title="protos/photo_service.proto"
+syntax = "proto3";
+
+package bereal;
+
+
+import "models.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+
+// Generated according to https://cloud.google.com/apis/design/standard_methods
+service PhotoService {
+  rpc ListPhotos(ListPhotosRequest) returns (ListPhotosResponse) {}
+  rpc GetPhoto(GetPhotoRequest) returns (Photo) {}
+  rpc CreatePhoto(CreatePhotoRequest) returns (Photo) {}
+  rpc UpdatePhoto(UpdatePhotoRequest) returns (Photo) {}
+  rpc DeletePhoto(DeletePhotoRequest) returns (google.protobuf.Empty) {}
+}
+
+message ListPhotosRequest {
+  // The parent resource id, for example, "shelves/shelf1"
+  string parent = 1;
+
+  // The maximum number of items to return.
+  int32 page_size = 2;
+
+  // The next_page_token value returned from a previous List request, if any.
+  string page_token = 3;
+}
+
+message ListPhotosResponse {
+  // The field id should match the noun "photo" in the method id.
+  // There will be a maximum number of items returned based on the page_size field in the request.
+  repeated Photo photos = 1;
+
+  // Token to retrieve the next page of results, or empty if there are no more results in the list.
+  string next_page_token = 2;
+}
+
+message GetPhotoRequest {
+  // The field will contain name of the resource requested.
+  string id = 1;
+}
+
+message CreatePhotoRequest {
+  Photo photo = 1;
+}
+
+message UpdatePhotoRequest {
+  // The photo resource which replaces the resource on the server.
+  Photo photo = 1;
+
+  // The update mask applies to the resource. For the `FieldMask` definition,
+  // see https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#fieldmask
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+message DeletePhotoRequest {
+  // The resource id of the photo to be deleted.
+  string id = 1;
+}
+```
+
+
+We're also going to update the `generate-protos.sh` file and add `photo_service.proto` file to the list of files to be generated. 
+
+```bash
+# Generate grpc stubs
+protoc -I protos/ --dart_out=grpc:lib/grpc-gen/ protos/user_service.proto protos/photo_service.proto
+```
+
+With our service code generation done, let's move to stormberry and model the relation between users and photos. 
+
+## Photo model relationships with stormberry
+Since in the database, we're going to have a 1 to many relationship between a user and photos, we're going to modify the account class to include this relationship. We're going to use views in order to reduce the amount of data being retrieved from the database and also not query some things based on what we want. 
+
+```dart
+import 'package:stormberry/stormberry.dart';
+
+part 'models.schema.dart';
+
+@Model(
+  tableName: 'accounts',
+  views: [#Full, #Reduced, #Base],
+)
+abstract class User {
+  // the firebase id
+  @PrimaryKey()
+  String get id;
+
+  String get username;
+
+  @HiddenIn(#Reduced)
+  String? get phone;
+
+  DateTime get createdAt;
+
+  @HiddenIn(#Reduced)
+  @HiddenIn(#Full)
+  String get passwordHash;
+
+  @HiddenIn(#Reduced)
+  @HiddenIn(#Base)
+  @ViewedIn(#Full, as: #Base)
+  List<Photo> get photos;
+}
+
+@Model(
+  tableName: 'photos',
+  views: [#Base, #Complete],
+)
+abstract class Photo {
+  @PrimaryKey()
+  String get id;
+
+  String get url;
+
+  String get description;
+
+  DateTime get createdAt;
+
+  @ViewedIn(#Base, as: #Reduced)
+  @ViewedIn(#Complete, as: #Reduced)
+  User get creator;
+
+  @ViewedIn(#Base, as: #Base)
+  @ViewedIn(#Complete, as: #Base)
+  List<Like> get likes;
+}
+
+@Model(
+  views: [#Base],
+)
+abstract class Like {
+  @PrimaryKey()
+  int get id;
+
+  DateTime get createdAt;
+
+  @ViewedIn(#Base, as: #Reduced)
+  User get user;
+}
+```
+
+
+
+In the modified example, we've declared three views on the `User` model. `[#Full, #Reduced, #Base],` views. 
+When the code generator completes, we're going to have two views named `FullUserView`, `ReducedUserView` and `BaseUserView`. When stormberry returns the data from the database, it returns all the properties defined on the specified views. 
+In the `FullUserView`, we want to get the user's properties together with all the photos he owns. 
+
+In the `ReducedUserView`, we only want the `[id,username & createdAt]` properties. This will be important when referencing the creator who uploaded the photo, the likes of a photo etc. This will mean less data queried from the database which makes our services faster. 
+
+In the `BaseUserView`, we want to have all the user properties without the photos of the user. 
+
+In the `FullUserView`, we want to have all the data together with the user's photos except the `passwordHash`.
+
+
+On the Photos side, we have two views `[#Base, #Complete]`, this will generate `BasePhotoView` and `CompletePhotoView`. 
+In the `BasePhotoView` and `CompletePhotoView`, we're going to have the `creator` of the property but the model will be viewed as `ReducedUserView`. 
+
+The Like model will generate `BaseLikeView` only. 
+
+If you look at the class, we have some annotations on the User properties and views. These annotations are used to either tell stormberry which fields are required for different Views. 
+1. `HiddenIn(#ViewName)` says that we don't want to have this property in `ViewName`
+So for example, `phone` is hidden in the `ReducedUserView`. The passwordHash is also hidden in `ReducedUserView`. 
+2. `ViewedIn(#ViewName, as #SomeViewName)` tells stormberry that in this relationship, we want to view some property as some view. 
+In the case of 
+```dart
+  @HiddenIn(#Reduced)
+  @ViewedIn(#Full, as: #Base)
+  List<Photo> get photos;
+  ```
+we're telling stormberry that we want to get the users photos as `BasePhotoView` when accessing the `FullUserView`. In the `ReducedUserView`, the photos property will be hidden and not be queried from the database. 
+If you had a hard time understanding this, you can look at the stormberry docs on https://pub.dev/packages/stormberry.
+
+:::tip
+
+You can checkout the code at this point using the code below.
+```bash
+git clone https://github.com/bettdouglas/be-real-clone.git
+cd be-real-clone
+git checkout 9be73f8
+```
+:::
+
+With the new database changes to use views, there will be changes on the `UserRepository` as the queries will be updated to match the new views. The changes are quite explanatory since without the views, we queried the `UserView`, but with views, we have queries that query `CompleteUserView` ,`FullUserView` and `BaseUserView`
+
+:::tip
+Checkout code using the new views using the commit below. 
+```bash
+git clone https://github.com/bettdouglas/be-real-clone.git
+cd be-real-clone
+git checkout 064f9bb
+```
+:::
+
+### gRPC Photo Service
+
+Let's create a class called PhotoService which will implement the `PhotoServiceBase` generated by protoc.
+
+```dart title="lib/services/photo_service.dart"
+import 'package:server/grpc-gen/google/protobuf/empty.pb.dart';
+import 'package:grpc/grpc.dart';
+import 'package:server/grpc-gen/photo_service.pbgrpc.dart';
+import 'package:server/grpc-gen/models.pb.dart' as grpc;
+
+class PhotoService extends PhotoServiceBase {
+  @override
+  Future<grpc.Photo> createPhoto(
+    ServiceCall call,
+    CreatePhotoRequest request,
+  ) async {
+    // TODO: implement createPhoto
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Empty> deletePhoto(
+    ServiceCall call,
+    DeletePhotoRequest request,
+  ) async {
+    // TODO: implement deletePhoto
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<grpc.Photo> getPhoto(
+    ServiceCall call,
+    GetPhotoRequest request,
+  ) async {
+    // TODO: implement getPhoto
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<ListPhotosResponse> listPhotos(
+    ServiceCall call,
+    ListPhotosRequest request,
+  ) async {
+    // TODO: implement listPhotos
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<grpc.Photo> updatePhoto(
+    ServiceCall call,
+    UpdatePhotoRequest request,
+  ) async {
+    // TODO: implement updatePhoto
+    throw UnimplementedError();
+  }
+}
+```
+
+We'll mainly be quering the `BasePhotoView` and `CompletePhotoView`. Let's create extension methods that will convert the views into the gRPC generated `Photo` class. 
+
+```dart title="lib/services/photo_service.dart"
+extension AsBaseGrpcPhoto on BasePhotoView {
+  grpc.Photo asGrpcPhoto() {
+    return grpc.Photo(
+      id: id,
+      createdAt: Timestamp.fromDateTime(createdAt),
+      creator: creator.asGrpcUser(),
+      description: description,
+      url: url,
+      likers: likes.map((e) => e.user.asGrpcUser()).toList(),
+    );
+  }
+}
+
+extension AsCompleteGrpcPhoto on CompletePhotoView {
+  grpc.Photo asGrpcPhoto() {
+    return grpc.Photo(
+      id: id,
+      createdAt: Timestamp.fromDateTime(createdAt),
+      creator: creator.asGrpcUser(),
+      description: description,
+      url: url,
+      likers: likes.map((e) => e.user.asGrpcUser()).toList(),
+    );
+  }
+}
+```
+
+### CreatePhoto method
+
+When creating a photo, the user who's calling the API will need to be identified. The good thing is this was handled by the `auth_interceptor` which validates tokens and adds the `user_id` field into the call metadata if the token supplied was valid otherwise the call get's terminated. 
+
+With that in mind, the implementation as follows:
+Keep in mind that the `asGrpcPhoto` method comes from the extension methods defined above.
+
+```dart
+@override
+Future<grpc.Photo> createPhoto(
+  ServiceCall call,
+  CreatePhotoRequest request,
+) async {
+  final userId = call.clientMetadata!['user_id'];
+  if (userId == null) {
+    throw GrpcError.internal('Request passed auth_interceptor without the user_id');
+  }
+  final photo = request.photo;
+  final id = Uuid().v4();
+  await photoRepository.insertOne(
+    PhotoInsertRequest(
+      id: id,
+      url: photo.url,
+      description: photo.description,
+      createdAt: photo.createdAt.toDateTime(),
+      creatorId: userId,
+    ),
+  );
+  final got = await photoRepository.queryBaseView(id);
+  return got!.asGrpcPhoto();
+}
+```
+
+### DeletePhoto method
+This call will be a simple delete in the database.
+```dart
+@override
+Future<Empty> deletePhoto(
+  ServiceCall call,
+  DeletePhotoRequest request,
+) async {
+  await photoRepository.deleteOne(request.id);
+  return Empty();
+}
+```
+
+### GetPhoto method
+This call receives a `GetPhotoRequest` and returns a Photo if found. 
+```dart
+@override
+Future<grpc.Photo> getPhoto(
+  ServiceCall call,
+  GetPhotoRequest request,
+) async {
+  final completePhoto = await photoRepository.queryBaseView(request.id);
+  if (completePhoto == null) {
+    throw GrpcError.notFound();
+  }
+  return completePhoto.asGrpcPhoto();
+}
+```
+
+### ListPhotos
+This call receives a `ListPhotosRequest` with previousPageToken and expects back a `ListPhotosResponse` with the list of photos. We call the `queryBaseViews` method and return 100 photos
+```dart
+@override
+Future<ListPhotosResponse> listPhotos(
+  ServiceCall call,
+  ListPhotosRequest request,
+) async {
+  final offSet = int.tryParse(request.pageToken) ?? 0;
+  final photos = await photoRepository.queryBaseViews(
+    QueryParams(offset: offSet, limit: 100),
+  );
+  return ListPhotosResponse(
+    nextPageToken: (offSet + photos.length).toString(),
+    photos: photos.map((e) => e.asGrpcPhoto()).toList(),
+  );
+}
+```
+
+### UpdatePhoto
+This call receives a `UpdatePhotoRequest` with the photo and fields to be updated which are included in the `UpdateMask`. In our case though, the only field we'll let the user update is the description of the photo. Once updated, we query the database by the photo id and return it to the client. 
+
+```dart
+@override
+Future<grpc.Photo> updatePhoto(
+  ServiceCall call,
+  UpdatePhotoRequest request,
+) async {
+  final updateMaskPaths = request.updateMask.paths;
+  final photo = request.photo;
+  // we can only update the description
+  String? description;
+  for (var path in updateMaskPaths) {
+    if (path == 'description') {
+      description = photo.description;
+    }
+  }
+  final updatePhotoRequest = PhotoUpdateRequest(
+    id: photo.id,
+    description: description,
+  );
+  await photoRepository.updateOne(updatePhotoRequest);
+  final got = await photoRepository.queryBaseView(photo.id);
+  return got!.asGrpcPhoto();
+}
+```
+
+If you want to test the service, use [kreya](https://kreya.app) for this.
+
+## Likes Service
+To handle the likes, we'll need a service that will `Create`, `Delete` and `List` likes. Unliking a photo will be handled by `DeleteLike` method. Liking a photo will be handled by `CreateLike` photo. Listing a photo's likes will be handled by `ListLikes` method. 
+
+
