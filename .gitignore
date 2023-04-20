@@ -21,3 +21,5 @@ yarn-error.log*
 
 *.lock
 *.hive
+
+**/kreya-config/
