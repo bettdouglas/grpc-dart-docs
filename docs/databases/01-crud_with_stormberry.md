@@ -552,12 +552,18 @@ Future<Map<String, dynamic>> decodeJwt(String token) async {
     }));
   final verified = await unverified.verify(keyStore);
   if (verified) {
-    final claims = unverified.claims.toJson();
+    final claims = Map<String,dynamic>.from(unverified.claims.toJson());
+    claims['user_id'] = claims['id'];
     return claims;
   } else {
     throw Exception('Invalid token');
   }
 }
+```
+
+We're also going to add a new key to the environment variables called `SECRET_KEY` which will be used to sign the issued `JWT` tokens. 
+```env
+SECRET_KEY=...
 ```
 
 With that out of the way, we can now create the user. When creating the user, we check if a user with the same name already exists. We later hash the password, save the user and create a JWT token to be used for subsequent requests. 

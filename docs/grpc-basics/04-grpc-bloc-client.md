@@ -161,7 +161,7 @@ After running ```flutter pub get```, let's start build_runner since freezed make
 
 After importing the `african_hospitals_client`, we'll use `RepositoryProvider` to inject the `HospitalServiceClient` into our app so that we access it when implementing the various blocs. 
 
-```
+```dart
 import 'package:african_hospitals_bloc_client/list_hospitals/list_hospitals.dart';
 import 'package:african_hospitals_client/african_hospitals_client.dart';
 import 'package:flutter/material.dart';
