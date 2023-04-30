@@ -29,7 +29,7 @@ const FeatureList = [
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        You've seen how powerful the dart lanugage is on Flutter. Bring the same power to your backends. 
+        You've seen how powerful the dart language is on Flutter. Bring the same power to your backends. 
       </>
     ),
   },
